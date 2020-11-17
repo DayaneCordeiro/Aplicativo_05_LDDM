@@ -9,15 +9,15 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MultiProvider(
-        providers:[
+        providers: [
           Provider<PessoaController>.value(
-            value: PessoaController(),)
+            value: PessoaController(),
+          )
         ],
         child: MaterialApp(
-          title: 'PUC APP',
+          title: 'Dexter Pizzaria',
           debugShowCheckedModeBanner: false,
           home: PessoaListView(),
-        )
-    );
+        ));
   }
 }
