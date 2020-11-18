@@ -17,8 +17,9 @@ class FindCep {
       this.localidade,
       this.uf});
 
-  factory FindCep.fromJson(String result) =>
-      FindCep.fromMap(json.decode(result));
+  factory FindCep.fromJson(String result) {
+    return FindCep();
+  }
 
   String toJson() => json.encode(toMap());
 

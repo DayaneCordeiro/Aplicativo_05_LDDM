@@ -1,11 +1,11 @@
-
 import 'package:app_web_papi/controllers/pessoa.controller.dart';
+import 'package:app_web_papi/models/findCep.model.dart';
 import 'package:app_web_papi/models/pessoa.model.dart';
+import 'package:app_web_papi/repositories/findCep.repository.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 class PessoaFormView extends StatefulWidget {
-
   final Pessoa pessoa;
 
   PessoaFormView({this.pessoa});
@@ -15,7 +15,6 @@ class PessoaFormView extends StatefulWidget {
 }
 
 class _PessoaFormViewState extends State<PessoaFormView> {
-
   final _tId = TextEditingController();
   final _tNome = TextEditingController();
   final _tCep = TextEditingController();
@@ -29,6 +28,12 @@ class _PessoaFormViewState extends State<PessoaFormView> {
 
   bool _isEdited = false;
   Pessoa _pessoa;
+
+  @override
+  void dispose() {
+    super.dispose();
+    _tCep.clear();
+  }
 
   @override
   void initState() {
@@ -60,7 +65,8 @@ class _PessoaFormViewState extends State<PessoaFormView> {
   }
 
   // Widget EditText
-  _editText(String field, TextEditingController controller, TextInputType type) {
+  _editText(
+      String field, TextEditingController controller, TextInputType type) {
     return TextFormField(
       controller: controller,
       validator: (s) => _validate(s, field),
@@ -71,9 +77,13 @@ class _PessoaFormViewState extends State<PessoaFormView> {
     );
   }
 
+  Future _searchCep(String cep) async {
+    final result = await FindcepRepository.fetchCep(cep: cep);
+    return result;
+  }
+
   @override
   Widget build(BuildContext context) {
-
     final _controller = Provider.of<PessoaController>(context);
 
     return Scaffold(
@@ -88,13 +98,18 @@ class _PessoaFormViewState extends State<PessoaFormView> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: <Widget>[
-                _editText("Nome", _tNome,TextInputType.text),
-                _editText("CEP", _tCep,TextInputType.text),
-                _editText("Rua", _tlogradouro,TextInputType.text),
-                _editText("Complemento", _tcomplemento,TextInputType.text),
-                _editText("Bairro", _tbairro,TextInputType.text),
-                _editText("Cidade", _tlocalidade,TextInputType.text),
-                _editText("UF", _tuf,TextInputType.text),
+                _editText("Nome", _tNome, TextInputType.text),
+                TextFormField(
+                  onChanged: (text) {
+                    FindCep fc = _searchCep(text) as FindCep;
+                    print(fc.localidade);
+                  },
+                ),
+                _editText("Rua", _tlogradouro, TextInputType.text),
+                _editText("Complemento", _tcomplemento, TextInputType.text),
+                _editText("Bairro", _tbairro, TextInputType.text),
+                _editText("Cidade", _tlocalidade, TextInputType.text),
+                _editText("UF", _tuf, TextInputType.text),
                 Container(
                   margin: EdgeInsets.only(top: 10.0, bottom: 20),
                   height: 45,
@@ -109,7 +124,6 @@ class _PessoaFormViewState extends State<PessoaFormView> {
                     ),
                     onPressed: () {
                       if (_formKey.currentState.validate()) {
-
                         _pessoa.nome = _tNome.text;
                         _pessoa.cep = _tCep.text;
                         _pessoa.logradouro = _tlogradouro.text;
@@ -118,9 +132,9 @@ class _PessoaFormViewState extends State<PessoaFormView> {
                         _pessoa.localidade = _tlocalidade.text;
                         _pessoa.uf = _tuf.text;
 
-                        if(_isEdited){
+                        if (_isEdited) {
                           _controller.edit(_pessoa);
-                        }else{
+                        } else {
                           _pessoa.id = 0;
                           _controller.create(_pessoa);
                         }
@@ -129,7 +143,7 @@ class _PessoaFormViewState extends State<PessoaFormView> {
                     },
                   ),
                 ),
-                if(_isEdited)
+                if (_isEdited)
                   Container(
                     margin: EdgeInsets.only(top: 5.0, bottom: 5),
                     height: 45,
@@ -143,15 +157,15 @@ class _PessoaFormViewState extends State<PessoaFormView> {
                         ),
                       ),
                       onPressed: () {
-                        if (_formKey.currentState.validate()){
-
+                        if (_formKey.currentState.validate()) {
                           showDialog(
                             context: context,
                             builder: (BuildContext context) {
                               // return object of type Dialog
                               return AlertDialog(
                                 title: new Text("Exclusão de Registro"),
-                                content: new Text("Tem certeza que deseja excluir este registro?"),
+                                content: new Text(
+                                    "Tem certeza que deseja excluir este registro?"),
                                 actions: <Widget>[
                                   // usually buttons at the bottom of the dialog
                                   FlatButton(
@@ -172,7 +186,6 @@ class _PessoaFormViewState extends State<PessoaFormView> {
                               );
                             },
                           );
-
                         }
                       },
                     ),
