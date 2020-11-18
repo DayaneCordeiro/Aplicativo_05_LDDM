@@ -85,10 +85,12 @@ class _PessoaListViewState extends State<PessoaListView> {
 
   void _showPessoaFormView({Pessoa pessoa}) async {
     await Navigator.push(
-        context,
-        MaterialPageRoute(
-            builder: (context) => PessoaFormView(
-                  pessoa: pessoa,
-                )));
+      context,
+      MaterialPageRoute(
+        builder: (context) => PessoaFormView(
+          pessoa: pessoa,
+        ),
+      ),
+    );
   }
 }
