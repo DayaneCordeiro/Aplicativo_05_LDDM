@@ -113,6 +113,11 @@ class _PessoaFormViewState extends State<PessoaFormView> {
                 // CEP
                 TextFormField(
                   controller: _tCep,
+                  validator: (s) => _validate(s, "Cep"),
+                  keyboardType: TextInputType.number,
+                  decoration: InputDecoration(
+                    labelText: "Cep",
+                  ),
                   onChanged: (text) {
                     _searchCep();
                   },
