@@ -1,9 +1,9 @@
 import 'package:app_web_papi/controllers/pessoa.controller.dart';
-import 'package:app_web_papi/models/findCep.model.dart';
 import 'package:app_web_papi/models/pessoa.model.dart';
-import 'package:app_web_papi/repositories/findCep.repository.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 class PessoaFormView extends StatefulWidget {
   final Pessoa pessoa;
@@ -28,12 +28,6 @@ class _PessoaFormViewState extends State<PessoaFormView> {
 
   bool _isEdited = false;
   Pessoa _pessoa;
-
-  @override
-  void dispose() {
-    super.dispose();
-    _tCep.clear();
-  }
 
   @override
   void initState() {
@@ -77,9 +71,25 @@ class _PessoaFormViewState extends State<PessoaFormView> {
     );
   }
 
-  Future _searchCep(String cep) async {
-    final result = await FindcepRepository.fetchCep(cep: cep);
-    return result;
+  Future _searchCep() async {
+    // Defines the URL whit correct zip code
+    final url = "https://viacep.com.br/ws/${_tCep.text}/json";
+
+    // Creates a http Response type variable
+    http.Response response;
+
+    // Get the request and save in response var
+    response = await http.get(url);
+
+    Map<String, dynamic> result = json.decode(response.body);
+
+    setState(() {
+      _tlogradouro.text = result["logradouro"];
+      _tcomplemento.text = result["complemento"];
+      _tbairro.text = result["bairro"];
+      _tlocalidade.text = result["localidade"];
+      _tuf.text = result["uf"];
+    });
   }
 
   @override
@@ -99,12 +109,15 @@ class _PessoaFormViewState extends State<PessoaFormView> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: <Widget>[
                 _editText("Nome", _tNome, TextInputType.text),
+
+                // CEP
                 TextFormField(
+                  controller: _tCep,
                   onChanged: (text) {
-                    FindCep fc = _searchCep(text) as FindCep;
-                    print(fc.localidade);
+                    _searchCep();
                   },
                 ),
+
                 _editText("Rua", _tlogradouro, TextInputType.text),
                 _editText("Complemento", _tcomplemento, TextInputType.text),
                 _editText("Bairro", _tbairro, TextInputType.text),
