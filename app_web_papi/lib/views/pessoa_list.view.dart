@@ -56,7 +56,9 @@ class _PessoaListViewState extends State<PessoaListView> {
                           style: TextStyle(color: Colors.white, fontSize: 20),
                         ),
                         subtitle: Text(
-                          _controller.list[index].localidade,
+                          (_controller.list[index].localidade != null)
+                              ? _controller.list[index].localidade
+                              : "",
                           style: TextStyle(
                             color: Colors.white,
                           ),
