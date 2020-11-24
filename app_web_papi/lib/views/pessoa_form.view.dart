@@ -67,7 +67,9 @@ class _PessoaFormViewState extends State<PessoaFormView> {
       keyboardType: type,
       decoration: InputDecoration(
         labelText: field,
+        labelStyle: TextStyle(color: Colors.white),
       ),
+      style: TextStyle(color: Colors.white),
     );
   }
 
@@ -81,6 +83,7 @@ class _PessoaFormViewState extends State<PessoaFormView> {
     // Get the request and save in response var
     response = await http.get(url);
 
+    // Converts json into a Dart string array
     Map<String, dynamic> result = json.decode(response.body);
 
     setState(() {
@@ -98,43 +101,80 @@ class _PessoaFormViewState extends State<PessoaFormView> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text("Pessoa"),
+        title: Text("Cadastro de cliente 👧"),
         centerTitle: true,
+        backgroundColor: Colors.cyan[800],
       ),
       body: SingleChildScrollView(
-          padding: EdgeInsets.all(15.0),
-          child: Form(
-            key: _formKey,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: <Widget>[
-                _editText("Nome", _tNome, TextInputType.text),
+        padding: EdgeInsets.all(15.0),
+        child: Form(
+          key: _formKey,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: <Widget>[
+              _editText("Nome", _tNome, TextInputType.text),
 
-                // CEP
-                TextFormField(
-                  controller: _tCep,
-                  validator: (s) => _validate(s, "Cep"),
-                  keyboardType: TextInputType.number,
-                  decoration: InputDecoration(
-                    labelText: "Cep",
+              // CEP
+              TextFormField(
+                controller: _tCep,
+                validator: (s) => _validate(s, "CEP"),
+                keyboardType: TextInputType.number,
+                decoration: InputDecoration(
+                  labelText: "CEP",
+                  labelStyle: TextStyle(color: Colors.white),
+                ),
+                style: TextStyle(color: Colors.white),
+                onChanged: (text) {
+                  _searchCep();
+                },
+              ),
+
+              _editText("Rua", _tlogradouro, TextInputType.text),
+              _editText("Complemento", _tcomplemento, TextInputType.text),
+              _editText("Bairro", _tbairro, TextInputType.text),
+              _editText("Cidade", _tlocalidade, TextInputType.text),
+              _editText("UF", _tuf, TextInputType.text),
+              Container(
+                margin: EdgeInsets.only(top: 10.0, bottom: 20),
+                height: 45,
+                child: RaisedButton(
+                  color: Colors.blue,
+                  child: Text(
+                    "Salvar",
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 22,
+                    ),
                   ),
-                  onChanged: (text) {
-                    _searchCep();
+                  onPressed: () {
+                    if (_formKey.currentState.validate()) {
+                      _pessoa.nome = _tNome.text;
+                      _pessoa.cep = _tCep.text;
+                      _pessoa.logradouro = _tlogradouro.text;
+                      _pessoa.complemento = _tcomplemento.text;
+                      _pessoa.bairro = _tbairro.text;
+                      _pessoa.localidade = _tlocalidade.text;
+                      _pessoa.uf = _tuf.text;
+
+                      if (_isEdited) {
+                        _controller.edit(_pessoa);
+                      } else {
+                        _pessoa.id = 0;
+                        _controller.create(_pessoa);
+                      }
+                      Navigator.pop(context);
+                    }
                   },
                 ),
-
-                _editText("Rua", _tlogradouro, TextInputType.text),
-                _editText("Complemento", _tcomplemento, TextInputType.text),
-                _editText("Bairro", _tbairro, TextInputType.text),
-                _editText("Cidade", _tlocalidade, TextInputType.text),
-                _editText("UF", _tuf, TextInputType.text),
+              ),
+              if (_isEdited)
                 Container(
-                  margin: EdgeInsets.only(top: 10.0, bottom: 20),
+                  margin: EdgeInsets.only(top: 5.0, bottom: 5),
                   height: 45,
                   child: RaisedButton(
-                    color: Colors.blue,
+                    color: Colors.red,
                     child: Text(
-                      "Salvar",
+                      "Remover",
                       style: TextStyle(
                         color: Colors.white,
                         fontSize: 22,
@@ -142,75 +182,43 @@ class _PessoaFormViewState extends State<PessoaFormView> {
                     ),
                     onPressed: () {
                       if (_formKey.currentState.validate()) {
-                        _pessoa.nome = _tNome.text;
-                        _pessoa.cep = _tCep.text;
-                        _pessoa.logradouro = _tlogradouro.text;
-                        _pessoa.complemento = _tcomplemento.text;
-                        _pessoa.bairro = _tbairro.text;
-                        _pessoa.localidade = _tlocalidade.text;
-                        _pessoa.uf = _tuf.text;
-
-                        if (_isEdited) {
-                          _controller.edit(_pessoa);
-                        } else {
-                          _pessoa.id = 0;
-                          _controller.create(_pessoa);
-                        }
-                        Navigator.pop(context);
+                        showDialog(
+                          context: context,
+                          builder: (BuildContext context) {
+                            // return object of type Dialog
+                            return AlertDialog(
+                              title: new Text("Exclusão de Registro"),
+                              content: new Text(
+                                  "Tem certeza que deseja excluir este registro?"),
+                              actions: <Widget>[
+                                // usually buttons at the bottom of the dialog
+                                FlatButton(
+                                  child: new Text("Cancelar"),
+                                  onPressed: () {
+                                    Navigator.of(context).pop();
+                                  },
+                                ),
+                                FlatButton(
+                                  child: new Text("Excluir"),
+                                  onPressed: () {
+                                    _controller.delete(_pessoa.id);
+                                    Navigator.of(context).pop();
+                                    Navigator.pop(context);
+                                  },
+                                ),
+                              ],
+                            );
+                          },
+                        );
                       }
                     },
                   ),
                 ),
-                if (_isEdited)
-                  Container(
-                    margin: EdgeInsets.only(top: 5.0, bottom: 5),
-                    height: 45,
-                    child: RaisedButton(
-                      color: Colors.red,
-                      child: Text(
-                        "Remover",
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 22,
-                        ),
-                      ),
-                      onPressed: () {
-                        if (_formKey.currentState.validate()) {
-                          showDialog(
-                            context: context,
-                            builder: (BuildContext context) {
-                              // return object of type Dialog
-                              return AlertDialog(
-                                title: new Text("Exclusão de Registro"),
-                                content: new Text(
-                                    "Tem certeza que deseja excluir este registro?"),
-                                actions: <Widget>[
-                                  // usually buttons at the bottom of the dialog
-                                  FlatButton(
-                                    child: new Text("Cancelar"),
-                                    onPressed: () {
-                                      Navigator.of(context).pop();
-                                    },
-                                  ),
-                                  FlatButton(
-                                    child: new Text("Excluir"),
-                                    onPressed: () {
-                                      _controller.delete(_pessoa.id);
-                                      Navigator.of(context).pop();
-                                      Navigator.pop(context);
-                                    },
-                                  ),
-                                ],
-                              );
-                            },
-                          );
-                        }
-                      },
-                    ),
-                  ),
-              ],
-            ),
-          )),
+            ],
+          ),
+        ),
+      ),
+      backgroundColor: Colors.grey[800],
     );
   }
 }
